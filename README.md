@@ -1,5 +1,5 @@
 - 👋 Hi, i'm Charlz
-- 🌱 I’m currently learning javascript
+- 🌱 I’m currently learning react.js
 - 📫 How to reach me: [charlesobuzor@outlook.com](mailto:charlesobuzor@outlook.com)
 
 
