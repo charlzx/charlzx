@@ -7,7 +7,7 @@
 
 - 😊 Pronouns: He/him.
 - 🌱 I’m currently learning Reactjs.
-- 📫 How to reach me: [charlesobuzor@outlook.com](mailto:charlesobuzor@outlook.com)
+<!--- 📫 How to reach me: [charlesobuzor@outlook.com](mailto:charlesobuzor@outlook.com) -->
 
 ---
 
