@@ -364,14 +364,14 @@ const Preloader = ({ theme }) => (
 );
 
 // --- MAGNETIC BUTTON ---
-const MagneticButton = ({ children, as: Component = motion.button, ...props }) => {
+const MagneticButton = ({ children, ...props }) => {
     const ref = useRef(null);
     const { x, y } = useMagneticEffect(ref);
 
     return (
-        <Component ref={ref} style={{ x, y }} {...props}>
+        <motion.button ref={ref} style={{ x, y }} {...props}>
             {children}
-        </Component>
+        </motion.button>
     );
 };
 
@@ -380,7 +380,7 @@ const MagneticButton = ({ children, as: Component = motion.button, ...props }) =
 
 const Header = ({ currentPage, navigateTo, onMenuClick, theme, toggleTheme }) => {
     const navItems = [
-        ...(currentPage !== 'home' ? [{ id: 'home', label: 'Home' }] : []),
+        { id: 'home', label: 'Home' },
         { id: 'gallery', label: 'Gallery' },
         { id: 'projects', label: 'Projects' },
     ];
@@ -400,19 +400,24 @@ const Header = ({ currentPage, navigateTo, onMenuClick, theme, toggleTheme }) =>
                     <span className="text-xl font-bold tracking-wider">STUDIO</span>
                 </button>
                 <nav className="hidden md:flex items-center space-x-2">
-                    {navItems.map(item => (
-                        <button key={item.id} onClick={() => navigateTo(item.id)} className={`relative text-sm uppercase tracking-widest transition-colors duration-300 px-4 py-2 rounded-full hover:${textColorClass} ${currentPage === item.id ? textColorClass : inactiveTextColorClass}`}>
-                            {item.label}
-                            {currentPage === item.id && <motion.div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#C51A24]" layoutId="underline" transition={{ type: 'spring', stiffness: 300, damping: 30 }} />}
-                        </button>
-                    ))}
-                    <MagneticButton onClick={toggleTheme} className={`p-2 rounded-full ${textColorClass}`}>
+                    {navItems.map(item => {
+                        if (currentPage === 'home' && item.id === 'home') {
+                            return null;
+                        }
+                        return (
+                            <button key={item.id} onClick={() => navigateTo(item.id)} className={`relative text-sm uppercase tracking-widest transition-colors duration-300 px-4 py-2 rounded-full hover:${textColorClass} ${currentPage === item.id ? textColorClass : inactiveTextColorClass}`}>
+                                {item.label}
+                                {currentPage === item.id && <motion.div className="absolute -bottom-1 left-0 right-0 h-0.5 bg-[#C51A24]" layoutId="underline" transition={{ type: 'spring', stiffness: 300, damping: 30 }} />}
+                            </button>
+                        );
+                    })}
+                    <button onClick={toggleTheme} className={`p-2 rounded-full ${textColorClass}`}>
                         {theme === 'dark' ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
-                    </MagneticButton>
+                    </button>
                 </nav>
-                <MagneticButton className={`md:hidden p-2 z-50 ${textColorClass}`} onClick={onMenuClick}>
+                <button className={`md:hidden p-2 z-50 ${textColorClass}`} onClick={onMenuClick}>
                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </MagneticButton>
+                </button>
             </div>
         </header>
     );
@@ -984,17 +989,17 @@ const allProjects = [
     {
         id: 1, title: "Project Alpha", category: "Branding", img: "https://placehold.co/600x400/C51A24/1A1A1A?text=Alpha",
         subtitle: "Interactive Data Dashboard", description: "Designed and developed a cutting-edge interactive data dashboard for a B2B SaaS platform, focusing on real-time analytics and user-friendly visualization.",
-        bgColor: "#E8F5E9", sceneInitializer: sceneInitializers.initParticleScene,
+        bgColor: "#ebdcf3", sceneInitializer: sceneInitializers.initParticleScene,
     },
     {
         id: 2, title: "Project Beta", category: "Web Design", img: "https://placehold.co/600x400/333333/FFFFFF?text=Beta",
         subtitle: "E-commerce Platform Redesign", description: "Led the UI/UX redesign and front-end development for a fashion e-commerce site, improving conversion rates by 20% through optimized user flows and modern aesthetics.",
-        bgColor: "#FFFDE7", sceneInitializer: sceneInitializers.initCubeGridScene,
+        bgColor: "#eed8d3", sceneInitializer: sceneInitializers.initCubeGridScene,
     },
     {
         id: 3, title: "Project Gamma", category: "UI/UX", img: "https://placehold.co/600x400/555555/FFFFFF?text=Gamma",
         subtitle: "Mobile App Concept & Prototype", description: "Developed an interactive prototype for a new wellness mobile application, focusing on intuitive navigation and a calming visual design.",
-        bgColor: "#E1F5FE", sceneInitializer: sceneInitializers.initLineMeshScene,
+        bgColor: "#a3cca5", sceneInitializer: sceneInitializers.initLineMeshScene,
     },
     {
         id: 4, title: "Island World", category: "3D Environment", img: "https://placehold.co/600x400/2c5282/FFFFFF?text=Island",
@@ -1004,7 +1009,7 @@ const allProjects = [
     {
         id: 5, title: "Project Epsilon", category: "Branding", img: "https://placehold.co/600x400/C51A24/2c2c2c?text=Epsilon",
         subtitle: "AI-Powered Content Summarizer", description: "Developed a web tool that uses AI to summarize long articles or documents, providing concise key points for quick understanding.",
-        bgColor: "#F1F8E9", sceneInitializer: sceneInitializers.initFallingParticlesScene,
+        bgColor: "#bfbfab", sceneInitializer: sceneInitializers.initFallingParticlesScene,
     },
     {
         id: 6, title: "Project Zeta", category: "UI/UX", img: "https://placehold.co/600x400/666666/FFFFFF?text=Zeta",
@@ -1121,10 +1126,10 @@ const ProjectsPage = ({ theme, initialIndex = 0 }) => {
                     <h2 className="font-['Neue_Machina',_sans-serif] font-bold uppercase text-[clamp(2.8rem,9vw,7rem)] leading-none opacity-80" data-cursorvariant="text">
                         {project.title}
                     </h2>
-                    <div className="max-w-md self-end text-right">
+                    <div className="max-w-md self-end text-right mb-10">
                         <h3 className="font-bold text-xl mb-2">{project.subtitle}</h3>
                         <p className="opacity-70 text-sm">{project.description}</p>
-                        <MagneticButton as="a" href="#" className="text-blue-600 hover:text-blue-800 font-semibold flex items-center justify-end mt-4 text-sm">
+                        <MagneticButton as="a" href="#" className="inline-flex self-end text-blue-600 hover:text-blue-800 font-semibold items-center mt-4 text-sm">
                             View Case Study
                             <ArrowIcon className="ml-2 w-5 h-5" />
                         </MagneticButton>
