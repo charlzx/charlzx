@@ -696,96 +696,68 @@ const ContactSection = ({ theme }) => {
     )
 }
 
+// --- [CORRECTED] SERVICES SECTION ---
 const ServicesSection = ({ theme }) => {
-    const containerRef = useRef(null);
-    const { scrollYProgress } = useScroll({
-        target: containerRef,
-        offset: ["start start", "end end"]
-    });
-
     return (
-        <section ref={containerRef} className="relative py-20 md:py-28">
-            <div className="container mx-auto px-4 max-w-3xl text-center mb-24">
-                <AnimatedText 
-                    text="My Services"
+        <section className={`py-20 md:py-28 ${theme === 'dark' ? 'bg-[#0D0D0D]' : 'bg-[#F5F5F5]'}`}>
+             <div className="container mx-auto px-4 max-w-3xl text-center mb-24">
+                <AnimatedText
+                    text="Our Expertise"
                     el="h2"
                     className="text-3xl md:text-5xl font-bold"
                     data-cursorvariant="text"
                 />
+                 <p className={`${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'} mt-4`}>
+                    We provide a range of creative and technical services to bring your ideas to life.
+                 </p>
             </div>
+            {/* We map over the services and create a separate sticky container for each.
+                This ensures they stack correctly as the user scrolls. */}
             {servicesData.map((service, i) => {
                 const targetRef = useRef(null);
-                const { scrollYProgress: cardScrollYProgress } = useScroll({
+                // The scroll progress of each card is tracked individually.
+                const { scrollYProgress } = useScroll({
                     target: targetRef,
-                    offset: ['start end', 'start start']
+                    offset: ["start end", "end start"]
                 });
 
-                const scale = useTransform(cardScrollYProgress, [0, 1], [1 - (servicesData.length - i) * 0.05, 1]);
-                const opacity = useTransform(cardScrollYProgress, [0.5, 1], [0.5, 1]);
-                
+                // The card animates as it moves through the viewport.
+                const scale = useTransform(scrollYProgress, [0, 0.5, 1], [0.8, 1, 0.8]);
+                const opacity = useTransform(scrollYProgress, [0, 0.5, 1], [0.3, 1, 0.3]);
+                const rotate = useTransform(scrollYProgress, [0, 1], [-5, 5]);
+
                 return (
-                    <motion.div
-                        ref={targetRef}
-                        key={i}
-                        className="h-screen sticky top-0 flex items-center justify-center"
-                    >
-                        <motion.div 
-                            style={{ 
-                                scale, 
+                    // This `ref` is crucial. It's the element `useScroll` will track.
+                    // The `h-screen sticky` combo creates the stacking effect.
+                    <motion.div ref={targetRef} key={i} className="h-screen sticky top-0 flex items-center justify-center">
+                        <motion.div
+                            style={{
+                                scale,
                                 opacity,
-                                top: `${i * 2}rem`
+                                rotate,
+                                backgroundColor: service.color,
                             }}
-                            className="relative w-full max-w-4xl h-3/4 p-8 rounded-2xl flex flex-col justify-center"
+                            className="relative w-full max-w-4xl h-3/4 p-8 rounded-2xl flex flex-col justify-center shadow-2xl"
                         >
-                            <div className="absolute inset-0 rounded-2xl" style={{backgroundColor: service.color}}></div>
                             <div className="relative text-white">
-                                <h3 className="text-3xl md:text-5xl font-bold mb-4" data-cursorvariant="text">{service.title}</h3>
-                                <p className="text-lg md:text-xl" data-cursorvariant="text">{service.description}</p>
+                                 <h3
+                                     className="text-3xl md:text-5xl font-bold mb-4"
+                                     data-cursorvariant="text"
+                                 >
+                                     {service.title}
+                                 </h3>
+                                 <p
+                                     className="text-lg md:text-xl"
+                                     data-cursorvariant="text"
+                                 >
+                                     {service.description}
+                                 </p>
                             </div>
                         </motion.div>
                     </motion.div>
                 );
             })}
         </section>
-    );
-};
-
-const SkillsSection = ({ theme }) => {
-    const skills = [
-        { name: 'HTML', Icon: () => <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>HTML5</title><path d="M1.5 0h21l-1.91 21.563L11.977 24l-8.565-2.438L1.5 0zm7.031 9.75l-.232-2.718 10.059.003.23-2.622-13.23.002.69 7.843h11.42l-.327 3.426-2.91.804-2.956-.81-.188-2.11h-2.61l.29 3.855L12 19.25l5.873-1.57-.79-8.93z" fill="currentColor"/></svg> },
-        { name: 'CSS', Icon: () => <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>CSS3</title><path d="M1.5 0h21l-1.91 21.563L11.977 24l-8.565-2.438L1.5 0zm7.031 9.75l-.232-2.718 10.059.003.23-2.622-13.23.002.69 7.843h11.42l-.327 3.426-2.91.804-2.956-.81-.188-2.11h-2.61l.29 3.855L12 19.25l5.873-1.57-.79-8.93z" fill="currentColor"/></svg> },
-        { name: 'Sass', Icon: () => <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sass</title><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm6.158 17.158c-.32.32-.737.526-1.18.526-.442 0-.858-.207-1.18-.526l-1.842-1.842c-.32-.32-.526-.737-.526-1.18 0-.442.207-.858.526-1.18.32-.32.737-.526 1.18-.526.442 0 .858.207 1.18.526l1.842 1.842c.32.32.526.737.526 1.18 0 .442-.207.858-.526 1.18zM12 14.474c-3.368 0-6.105-2.737-6.105-6.105S8.632 2.263 12 2.263s6.105 2.737 6.105 6.105-2.737 6.106-6.105 6.106z" fill="currentColor"/></svg> },
-        { name: 'JavaScript', Icon: () => <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>JavaScript</title><path d="M0 0h24v24H0V0zm22.034 18.262c.42.639.639 1.25.639 1.875 0 .654-.234 1.224-.702 1.711-.459.486-1.089.729-1.89.729-.72 0-1.323-.189-1.809-.567-.486-.378-.846-.891-1.079-1.539l1.449-.837c.144.45.387.792.729.999.342.207.72.306 1.134.306.414 0 .783-.099 1.107-.297a1.13 1.13 0 00.468-.828c0-.306-.081-.576-.243-.81-.162-.234-.423-.486-.783-.756l-1.026-.756c-1.116-.81-1.926-1.584-2.43-2.322-.495-.738-.747-1.539-.747-2.403 0-.81.252-1.53.756-2.16.504-.63 1.161-.945 1.971-.945.621 0 1.179.162 1.674.486.495.324.864.765 1.107 1.323l-1.422.864c-.18-.459-.423-.792-.729-.999-.306-.207-.666-.306-1.08-.306-.396 0-.726.09-.99.27-.264.18-.396.423-.396.729 0 .288.072.54.216.756.144.216.396.459.756.729l1.044.756c1.35.972 2.349 1.899 3.006 2.781.657.882.981 1.836.981 2.862zm-8.43-1.026h-3.996v3.996h-1.98v-3.996h-2.016v-1.89h2.016v-2.97h1.98v2.97h3.996v1.89z" fill="currentColor"/></svg> },
-        { name: 'React', Icon: () => <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>React</title><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1.88-9.54c-.45-.25-1.02-.25-1.47 0-.45.25-.73.76-.73 1.32 0 .56.28 1.07.73 1.32.45.25 1.02.25 1.47 0 .45-.25.73-.76.73-1.32 0-.56-.28-1.07-.73-1.32zM12 4.44c-2.44 0-4.63.92-6.26 2.45l1.41 1.41C8.4 7.08 10.12 6.44 12 6.44s3.6.64 4.85 1.86l1.41-1.41C16.63 5.36 14.44 4.44 12 4.44zm0 15.12c2.44 0 4.63-.92 6.26-2.45l-1.41-1.41C15.6 16.92 13.88 17.56 12 17.56s-3.6-.64-4.85-1.86l-1.41 1.41C7.37 18.64 9.56 19.56 12 19.56zm6.12-6.36c-.45-.25-1.02-.25-1.47 0-.45.25-.73.76-.73 1.32 0 .56.28 1.07.73 1.32.45.25 1.02.25 1.47 0 .45-.25.73-.76.73-1.32 0-.56-.28-1.07-.73-1.32z" fill="currentColor"/></svg> },
-        { name: 'Git', Icon: () => <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Git</title><path d="M22.502 8.685l-8.685-8.685a2.502 2.502 0 00-3.538 0l-8.685 8.685a2.502 2.502 0 000 3.538l8.685 8.685a2.502 2.502 0 003.538 0l8.685-8.685a2.502 2.502 0 000-3.538zM12 18.11c-3.373 0-6.11-2.737-6.11-6.11s2.737-6.11 6.11-6.11 6.11 2.737 6.11 6.11-2.737 6.11-6.11 6.11zm-1.833-6.11a1.833 1.833 0 113.666 0 1.833 1.833 0 01-3.666 0z" fill="currentColor"/></svg> },
-    ];
-
-    return (
-        <AnimatedSection className={`py-20 md:py-28 ${theme === 'dark' ? 'bg-[#111]' : 'bg-gray-100'}`}>
-            <div className="container mx-auto px-4">
-                <AnimatedText 
-                    text="My Toolkit"
-                    el="h2"
-                    className="text-3xl md:text-5xl font-bold text-center mb-16"
-                    data-cursorvariant="text"
-                />
-                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-8 max-w-4xl mx-auto">
-                    {skills.map((skill, i) => (
-                        <motion.div 
-                            key={i} 
-                            whileHover={{ scale: 1.1, rotate: 5 }}
-                            transition={{ type: 'spring', stiffness: 300 }}
-                            className={`p-6 rounded-lg flex flex-col items-center justify-center gap-4 ${theme === 'dark' ? 'bg-[#1A1A1A]' : 'bg-white shadow-md'}`}
-                        >
-                            <div className={`w-16 h-16 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
-                                <skill.Icon />
-                            </div>
-                            <p className="font-semibold text-sm">{skill.name}</p>
-                        </motion.div>
-                    ))}
-                </div>
-            </div>
-        </AnimatedSection>
     );
 };
 
@@ -871,7 +843,6 @@ const HomePage = ({ theme, navigateTo }) => {
                     </MagneticButton>
                 </div>
             </div>
-            <SkillsSection theme={theme} />
             <ServicesSection theme={theme} />
         </motion.div>
     );
