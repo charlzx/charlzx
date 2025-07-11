@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { motion, AnimatePresence, useInView, useSpring, useMotionValue } from 'framer-motion';
+import { motion, AnimatePresence, useInView, useSpring, useMotionValue, useScroll, useTransform } from 'framer-motion';
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
@@ -105,23 +105,11 @@ const MoonIcon = ({ className }) => (
 );
 
 // --- Data for other pages ---
-const designProcessSteps = [
-    { title: "01. Discover", description: "We dive deep into your brand, goals, and audience to build a solid foundation." },
-    { title: "02. Define", description: "Crafting a clear strategy and visual direction that aligns with your vision." },
-    { title: "03. Develop", description: "Bringing the design to life with pixel-perfect execution and creative flair." },
-    { title: "04. Deploy", description: "Launching the final product and ensuring a seamless experience for your users." },
-];
-
-const testimonials = [
-    { name: "Jane Doe", company: "TechCorp", quote: "Working with this studio was a dream. They understood our vision perfectly and delivered beyond our expectations." },
-    { name: "John Smith", company: "Innovate Inc.", quote: "The level of creativity and professionalism is unmatched. They transformed our brand identity completely." },
-];
-
 const servicesData = [
-    { title: "UI/UX Design", description: "Crafting intuitive and beautiful user interfaces that provide a seamless user experience across all devices." },
-    { title: "Web Development", description: "Building robust, scalable, and high-performance websites and web applications using modern technologies." },
-    { title: "Brand Strategy", description: "Developing comprehensive brand identities, from logo design to messaging, that resonate with your target audience." },
-    { title: "Motion Graphics", description: "Creating captivating animations and motion graphics that bring your brand's story to life." },
+    { title: "UI/UX Design", description: "Crafting intuitive and beautiful user interfaces that provide a seamless user experience across all devices.", color: "#6D28D9" },
+    { title: "Web Development", description: "Building robust, scalable, and high-performance websites and web applications using modern technologies.", color: "#DB2777" },
+    { title: "Brand Strategy", description: "Developing comprehensive brand identities, from logo design to messaging, that resonate with your target audience.", color: "#EA580C" },
+    { title: "Motion Graphics", description: "Creating captivating animations and motion graphics that bring your brand's story to life.", color: "#16A34A" },
 ];
 
 // --- DYNAMIC & INTERACTIVE HOOKS ---
@@ -132,41 +120,42 @@ const useInteractiveCursor = (isTouchDevice) => {
     const [cursorVariant, setCursorVariant] = useState("default");
 
     useEffect(() => {
-        if (isTouchDevice) return;
+        if (!isTouchDevice) {
+            const moveCursor = (e) => {
+                x.set(e.clientX);
+                y.set(e.clientY);
+            };
+            window.addEventListener('mousemove', moveCursor);
+            document.body.style.cursor = 'none';
 
-        const moveCursor = (e) => {
-            x.set(e.clientX);
-            y.set(e.clientY);
-        };
-        window.addEventListener('mousemove', moveCursor);
-        document.body.style.cursor = 'none';
-
-        return () => {
-            window.removeEventListener('mousemove', moveCursor);
-            document.body.style.cursor = 'auto';
-        };
+            return () => {
+                window.removeEventListener('mousemove', moveCursor);
+                document.body.style.cursor = 'auto';
+            };
+        }
     }, [isTouchDevice, x, y]);
     
     useEffect(() => {
-        if (isTouchDevice) return;
-        const onMouseEnter = (e) => {
-            if (e.target.dataset.cursorvariant) {
-                setCursorVariant(e.target.dataset.cursorvariant);
-            }
-        };
-        const onMouseLeave = () => setCursorVariant("default");
+        if (!isTouchDevice) {
+            const onMouseEnter = (e) => {
+                if (e.target.dataset.cursorvariant) {
+                    setCursorVariant(e.target.dataset.cursorvariant);
+                }
+            };
+            const onMouseLeave = () => setCursorVariant("default");
 
-        const interactiveElements = document.querySelectorAll('[data-cursorvariant]');
-        interactiveElements.forEach(el => {
-            el.addEventListener('mouseenter', onMouseEnter);
-            el.addEventListener('mouseleave', onMouseLeave);
-        });
-
-        return () => {
-             interactiveElements.forEach(el => {
-                el.removeEventListener('mouseenter', onMouseEnter);
-                el.removeEventListener('mouseleave', onMouseLeave);
+            const interactiveElements = document.querySelectorAll('[data-cursorvariant]');
+            interactiveElements.forEach(el => {
+                el.addEventListener('mouseenter', onMouseEnter);
+                el.addEventListener('mouseleave', onMouseLeave);
             });
+
+            return () => {
+                 interactiveElements.forEach(el => {
+                    el.removeEventListener('mouseenter', onMouseEnter);
+                    el.removeEventListener('mouseleave', onMouseLeave);
+                });
+            };
         }
     }, [isTouchDevice]);
 
@@ -187,6 +176,7 @@ const useInteractiveCursor = (isTouchDevice) => {
 
     return { x, y, cursorVariant, cursorVariants };
 };
+
 
 const useMagneticEffect = (ref) => {
     const x = useSpring(0, { stiffness: 150, damping: 15, mass: 0.1 });
@@ -250,6 +240,10 @@ export default function App() {
     }, []);
 
     const { x: cursorX, y: cursorY, cursorVariant, cursorVariants } = useInteractiveCursor(isTouchDevice);
+    
+    const smoothCursorX = useSpring(cursorX, { stiffness: 500, damping: 40 });
+    const smoothCursorY = useSpring(cursorY, { stiffness: 500, damping: 40 });
+    
     const springConfig = { type: 'spring', stiffness: 200, damping: 20 };
 
     useEffect(() => {
@@ -258,7 +252,9 @@ export default function App() {
     }, []);
     
     useEffect(() => {
-        localStorage.setItem('theme', theme);
+        if (typeof window !== 'undefined') {
+            localStorage.setItem('theme', theme);
+        }
     }, [theme]);
 
     const navigateTo = (newPage) => {
@@ -282,10 +278,10 @@ export default function App() {
 
     const renderPage = () => {
         switch(page) {
-            case 'home': return <HomePage theme={theme} />;
+            case 'home': return <HomePage theme={theme} navigateTo={navigateTo} />;
             case 'projects': return <ProjectsPage theme={theme} initialIndex={initialProjectIndex} />;
             case 'gallery': return <GalleryPage theme={theme} navigateToProject={navigateToProject} />;
-            default: return <HomePage theme={theme} />;
+            default: return <HomePage theme={theme} navigateTo={navigateTo} />;
         }
     };
 
@@ -294,7 +290,7 @@ export default function App() {
             <link href="https://fonts.cdnfonts.com/css/neue-machina" rel="stylesheet" />
             <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
 
-            <div className={`antialiased font-['Inter',_sans-serif] min-h-screen w-full transition-colors duration-500 ${themeClasses}`}>
+            <div className={`relative antialiased font-['Inter',_sans-serif] min-h-screen w-full transition-colors duration-500 ${themeClasses}`}>
                 {!isTouchDevice && (
                     <motion.div
                         variants={cursorVariants}
@@ -302,26 +298,30 @@ export default function App() {
                         transition={springConfig}
                         className="pointer-events-none fixed top-0 left-0 z-[100] rounded-full"
                         style={{ 
-                            x: useSpring(cursorX, { stiffness: 500, damping: 40 }),
-                            y: useSpring(cursorY, { stiffness: 500, damping: 40 }),
+                            x: smoothCursorX,
+                            y: smoothCursorY,
                             translateX: '-50%',
                             translateY: '-50%'
                         }}
                     />
                 )}
 
+                {(page === 'home' || page === 'gallery') && !isLoading && <GridPatternBackground theme={theme} />}
+
                 <AnimatePresence>
                     {isLoading && <Preloader theme={theme} />}
                 </AnimatePresence>
                 
                 {!isLoading && (
-                    <>
+                    <div className="relative">
                         <Header 
                             currentPage={page} 
                             navigateTo={navigateTo}
                             onMenuClick={() => setIsMenuOpen(!isMenuOpen)}
                             theme={theme}
                             toggleTheme={toggleTheme}
+                            isTouchDevice={isTouchDevice}
+                            isMenuOpen={isMenuOpen}
                         />
                         <MobileMenu 
                             isOpen={isMenuOpen} 
@@ -334,8 +334,8 @@ export default function App() {
                             </main>
                         </AnimatePresence>
                         {page !== 'projects' && <ContactSection theme={theme} />}
-                        {page !== 'projects' && <Footer navigateTo={navigateTo} theme={theme} />}
-                    </>
+                        {page !== 'projects' && <Footer theme={theme} />}
+                    </div>
                 )}
             </div>
         </>
@@ -377,20 +377,56 @@ const MagneticButton = ({ children, ...props }) => {
 
 
 // --- HEADER, FOOTER & MENUS ---
+const Path = props => (
+  <motion.path
+    fill="transparent"
+    strokeWidth="3"
+    stroke="currentColor"
+    strokeLinecap="round"
+    {...props}
+  />
+);
 
-const Header = ({ currentPage, navigateTo, onMenuClick, theme, toggleTheme }) => {
+const MenuToggle = ({ toggle }) => (
+  <button onClick={toggle} className="md:hidden p-2 z-50">
+    <svg width="23" height="23" viewBox="0 0 23 23">
+      <Path
+        variants={{
+          closed: { d: "M 2 2.5 L 20 2.5" },
+          open: { d: "M 3 16.5 L 17 2.5" }
+        }}
+      />
+      <Path
+        d="M 2 9.423 L 20 9.423"
+        variants={{
+          closed: { opacity: 1 },
+          open: { opacity: 0 }
+        }}
+        transition={{ duration: 0.1 }}
+      />
+      <Path
+        variants={{
+          closed: { d: "M 2 16.346 L 20 16.346" },
+          open: { d: "M 3 2.5 L 17 16.346" }
+        }}
+      />
+    </svg>
+  </button>
+);
+
+const Header = ({ currentPage, navigateTo, onMenuClick, theme, toggleTheme, isTouchDevice, isMenuOpen }) => {
     const navItems = [
         { id: 'home', label: 'Home' },
         { id: 'gallery', label: 'Gallery' },
         { id: 'projects', label: 'Projects' },
     ];
     
-    const headerBgClass = theme === 'dark' ? 'bg-[#0D0D0D]' : 'bg-[#F5F5F5]';
+    const headerBgClass = theme === 'dark' ? 'bg-transparent' : 'bg-transparent';
     const textColorClass = theme === 'dark' ? 'text-white' : 'text-black';
     const inactiveTextColorClass = theme === 'dark' ? 'text-gray-400' : 'text-gray-500';
 
     return (
-        <header className={`relative z-50 ${headerBgClass}`}>
+        <header className={`${isTouchDevice ? 'relative' : 'fixed'} top-0 left-0 right-0 z-50 ${headerBgClass}`}>
             <div className="container mx-auto px-6 py-4 flex justify-between items-center">
                  <button className={`flex items-center space-x-2 ${textColorClass}`} onClick={() => navigateTo('home')}>
                      <svg width="28" height="28" viewBox="0 0 100 100">
@@ -399,7 +435,7 @@ const Header = ({ currentPage, navigateTo, onMenuClick, theme, toggleTheme }) =>
                     </svg>
                     <span className="text-xl font-bold tracking-wider">STUDIO</span>
                 </button>
-                <nav className="hidden md:flex items-center space-x-2">
+                <nav className="hidden md:flex items-center space-x-2 backdrop-blur-sm bg-white/10 rounded-full">
                     {navItems.map(item => {
                         if (currentPage === 'home' && item.id === 'home') {
                             return null;
@@ -415,12 +451,42 @@ const Header = ({ currentPage, navigateTo, onMenuClick, theme, toggleTheme }) =>
                         {theme === 'dark' ? <SunIcon className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
                     </button>
                 </nav>
-                <button className={`md:hidden p-2 z-50 ${textColorClass}`} onClick={onMenuClick}>
-                   <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 6H20M4 12H20M4 18H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/></svg>
-                </button>
+                <motion.nav
+                    className="md:hidden"
+                    initial={false}
+                    animate={isMenuOpen ? "open" : "closed"}
+                >
+                    <MenuToggle toggle={onMenuClick} />
+                </motion.nav>
             </div>
         </header>
     );
+};
+
+const mobileNavVariants = {
+  open: {
+    transition: { staggerChildren: 0.07, delayChildren: 0.2 }
+  },
+  closed: {
+    transition: { staggerChildren: 0.05, staggerDirection: -1 }
+  }
+};
+
+const mobileLinkVariants = {
+  open: {
+    y: 0,
+    opacity: 1,
+    transition: {
+      y: { stiffness: 1000, velocity: -100 }
+    }
+  },
+  closed: {
+    y: 50,
+    opacity: 0,
+    transition: {
+      y: { stiffness: 1000 }
+    }
+  }
 };
 
 const MobileMenu = ({ isOpen, navigateTo, theme }) => {
@@ -430,32 +496,42 @@ const MobileMenu = ({ isOpen, navigateTo, theme }) => {
         { id: 'projects', label: 'Projects' },
     ];
     const menuVariants = {
-        hidden: { x: '100%' },
-        visible: { x: '0%', transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] } }
+        open: {
+            clipPath: `circle(150% at 90% 10%)`,
+            transition: {
+                type: "spring",
+                stiffness: 20,
+                restDelta: 2
+            }
+        },
+        closed: {
+            clipPath: "circle(0% at 90% 10%)",
+            transition: {
+                delay: 0.5,
+                type: "spring",
+                stiffness: 400,
+                damping: 40
+            }
+        }
     };
-    const listVariants = {
-        hidden: {},
-        visible: { transition: { staggerChildren: 0.1, delayChildren: 0.3 } }
-    };
-    const itemVariants = {
-        hidden: { opacity: 0, y: 20 },
-        visible: { opacity: 1, y: 0, transition: { duration: 0.5, ease: 'easeOut' } }
-    };
-
+    
     return (
         <AnimatePresence>
             {isOpen && (
-                <motion.div 
+                <motion.div
+                    initial="closed"
+                    animate="open"
+                    exit="closed"
                     variants={menuVariants}
-                    initial="hidden"
-                    animate="visible"
-                    exit="hidden"
-                    className={`fixed inset-0 z-40 flex flex-col items-center justify-center ${theme === 'dark' ? 'bg-[#111]' : 'bg-[#F0F0F0]'}`}
+                    className={`fixed inset-0 z-40 ${theme === 'dark' ? 'bg-[#111]' : 'bg-[#F0F0F0]'}`}
                 >
-                    <motion.ul variants={listVariants} initial="hidden" animate="visible" exit="hidden" className="text-center">
+                    <motion.ul 
+                        variants={mobileNavVariants}
+                        className="h-full flex flex-col items-center justify-center space-y-6"
+                    >
                         {navItems.map(item => (
-                            <motion.li key={item.id} variants={itemVariants} className="my-4">
-                                <button onClick={() => navigateTo(item.id)} className="text-3xl font-bold" data-cursorvariant="text">{item.label}</button>
+                            <motion.li key={item.id} variants={mobileLinkVariants}>
+                                <button onClick={() => navigateTo(item.id)} className="text-4xl font-bold" data-cursorvariant="text">{item.label}</button>
                             </motion.li>
                         ))}
                     </motion.ul>
@@ -465,66 +541,50 @@ const MobileMenu = ({ isOpen, navigateTo, theme }) => {
     );
 };
 
-const Footer = ({ navigateTo, theme }) => {
-    const scrollToTop = () => {
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    };
-
+const Footer = ({ theme }) => {
     const socialLinks = [
-        { name: 'Twitter', href: '#', Icon: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M18 6l-9 9-4-4-1 1 5 5 10-10z"/></svg> },
-        { name: 'LinkedIn', href: '#', Icon: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg> },
-        { name: 'GitHub', href: '#', Icon: () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg> },
+        { 
+            name: 'GitHub', 
+            href: '#', 
+            Icon: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 19c-5 1.5-5-2.5-7-3m14 6v-3.87a3.37 3.37 0 0 0-.94-2.61c3.14-.35 6.44-1.54 6.44-7A5.44 5.44 0 0 0 20 4.77 5.07 5.07 0 0 0 19.91 1S18.73.65 16 2.48a13.38 13.38 0 0 0-7 0C6.27.65 5.09 1 5.09 1A5.07 5.07 0 0 0 5 4.77a5.44 5.44 0 0 0-1.5 3.78c0 5.42 3.3 6.61 6.44 7A3.37 3.37 0 0 0 9 18.13V22"/></svg> 
+        },
+        { 
+            name: 'LinkedIn', 
+            href: '#', 
+            Icon: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z"/><rect x="2" y="9" width="4" height="12"/><circle cx="4" cy="4" r="2"/></svg> 
+        },
+        { 
+            name: 'Email', 
+            href: 'mailto:info@studio.example', 
+            Icon: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
+        },
     ];
     
-    const navItems = [{ id: 'home', label: 'Home' }, { id: 'gallery', label: 'Gallery' }, { id: 'projects', label: 'Projects' }];
-    
     const footerClasses = theme === 'dark' 
-        ? 'bg-[#1A1A1A] border-gray-800 text-gray-400' 
-        : 'bg-[#EAEAEA] border-gray-300 text-gray-600';
-    const headingColor = theme === 'dark' ? 'text-white' : 'text-black';
+        ? 'border-gray-800 text-gray-500' 
+        : 'border-gray-300 text-gray-500';
     const hoverColor = theme === 'dark' ? 'hover:text-white' : 'hover:text-black';
 
     return (
-        <footer className={`border-t ${footerClasses} pt-16 pb-8`}>
-            <div className="container mx-auto px-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-8 mb-12">
-                    <div className="md:col-span-2 lg:col-span-2">
-                        <h4 className={`text-lg font-bold mb-4 ${headingColor}`}>STUDIO</h4>
-                        <p className="max-w-xs mb-6 text-xs">Creative studio crafting digital experiences that inspire and engage.</p>
-                        <div className="flex space-x-4">
-                            {socialLinks.map((social) => (
-                                <a key={social.name} href={social.href} target="_blank" rel="noopener noreferrer" className={`transition-colors ${hoverColor}`} data-cursorvariant="text">
-                                    <social.Icon />
-                                </a>
-                            ))}
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <h5 className={`font-bold mb-4 uppercase tracking-wider text-sm ${headingColor}`}>Quick Links</h5>
-                        <ul className="space-y-3 text-xs">
-                            {navItems.map(item => (
-                                <li key={item.id}><button onClick={() => navigateTo(item.id)} className={`transition-colors ${hoverColor}`} data-cursorvariant="text">{item.label}</button></li>
-                            ))}
-                        </ul>
-                    </div>
-
-                    <div>
-                        <h5 className={`font-bold mb-4 uppercase tracking-wider text-sm ${headingColor}`}>Contact Us</h5>
-                        <ul className="space-y-3 text-xs">
-                            <li><a href="mailto:info@studio.example" className={`transition-colors ${hoverColor}`} data-cursorvariant="text">info@studio.example</a></li>
-                            <li><p>Abuja, Nigeria</p></li>
-                        </ul>
-                    </div>
+        <footer className={`border-t ${footerClasses}`}>
+            <div className="container mx-auto px-6 py-8 flex flex-col items-center justify-center gap-6">
+                <div className="flex space-x-6">
+                    {socialLinks.map((social) => (
+                        <motion.a
+                            key={social.name}
+                            href={social.href}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            whileHover={{ y: -3, scale: 1.1 }}
+                            transition={{ type: 'spring', stiffness: 300 }}
+                            className={`transition-colors ${hoverColor}`}
+                            data-cursorvariant="text"
+                        >
+                            <social.Icon className="w-6 h-6" />
+                        </motion.a>
+                    ))}
                 </div>
-
-                <div className={`flex flex-col-reverse sm:flex-row justify-between items-center text-xs border-t pt-8 ${theme === 'dark' ? 'border-gray-800' : 'border-gray-300'}`}>
-                    <p>&copy; {new Date().getFullYear()} Studio. All Rights Reserved.</p>
-                    <button onClick={scrollToTop} className={`mb-4 sm:mb-0 flex items-center gap-2 transition-colors ${hoverColor}`} data-cursorvariant="text">
-                        Back to Top
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 15l7-7 7 7" /></svg>
-                    </button>
-                </div>
+                <p className="text-xs tracking-wider">&copy; 2025 Studio. All Rights Reserved.</p>
             </div>
         </footer>
     );
@@ -536,7 +596,7 @@ const Footer = ({ navigateTo, theme }) => {
 const GridPatternBackground = ({ theme }) => {
     const color = theme === 'dark' ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
     return (
-        <div className="absolute inset-0 z-[-1] overflow-hidden">
+        <div className="absolute inset-0 z-0 overflow-hidden">
             <svg width="100%" height="100%" xmlns="http://www.w3.org/2000/svg">
                 <defs>
                     <pattern id="grid" width="32" height="32" patternUnits="userSpaceOnUse">
@@ -636,78 +696,186 @@ const ContactSection = ({ theme }) => {
     )
 }
 
-const HomePage = ({ theme }) => {
+const ServicesSection = ({ theme }) => {
+    const containerRef = useRef(null);
+    const { scrollYProgress } = useScroll({
+        target: containerRef,
+        offset: ["start start", "end end"]
+    });
+
     return (
-    <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
-        <div className={`relative min-h-screen flex items-center justify-center overflow-hidden px-4`}>
-            <GridPatternBackground theme={theme} />
-            <div className="container mx-auto grid grid-cols-1 md:grid-cols-2 items-center gap-8 pt-32 md:pt-0">
-                <div className="z-10 text-center md:text-left">
-                    <p className={`text-xs uppercase tracking-[0.2em] mb-2 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-500'}`} data-cursorvariant="text">Our Version</p>
-                    <div className="overflow-hidden mb-4"><motion.h1 initial={{ y: '100%' }} animate={{ y: '0%' }} transition={{ duration: 1.2, ease: [0.22, 1, 0.36, 1], delay: 0.4 }} className="text-5xl md:text-7xl font-extrabold tracking-tighter" data-cursorvariant="text">DESIGN</motion.h1></div>
-                    <AnimatedText 
-                        text="Our hobby is a modern and convenient design, the key to successful communication with the client."
-                        el="p"
-                        className={`max-w-md mx-auto md:mx-0 mb-8 text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}
-                        data-cursorvariant="text"
-                    />
-                    <MagneticButton className={`group inline-flex items-center space-x-3 border rounded-full px-6 py-3 text-sm transition-all duration-300 ${theme === 'dark' ? 'border-gray-600 hover:bg-white hover:text-black' : 'border-gray-400 hover:bg-black hover:text-white'}`}>
-                        <span>See More</span><ArrowIcon className="transform transition-transform duration-500 ease-out group-hover:translate-x-1" />
-                    </MagneticButton>
-                </div>
-                <div className="relative w-full h-96 md:h-full flex items-center justify-center"><motion.div initial={{ opacity: 0, scale: 0.5 }} animate={{ opacity: 1, scale: 1 }} transition={{ duration: 1.2, delay: 0.6, ease: [0.22, 1, 0.36, 1] }} className="absolute w-[300px] h-[300px] md:w-[450px] md:h-[450px] bg-[#C51A24] rounded-full" /><motion.img initial={{ opacity: 0, x: 100 }} animate={{ opacity: 1, x: 0 }} transition={{ duration: 1.5, ease: [0.22, 1, 0.36, 1] }} src="https://i.ibb.co/L5B1s4B/poseidon-statue-png.png" alt="Statue of Poseidon" className="relative z-10 w-full h-full object-contain drop-shadow-[0_20px_20px_rgba(0,0,0,0.5)]" /></div>
-            </div>
-        </div>
-        <AnimatedSection className={`py-20 md:py-28 ${theme === 'dark' ? 'bg-[#111]' : 'bg-[#F0F0F0]'}`}>
-            <div className="container mx-auto px-4">
-                <h2 className="text-3xl font-bold text-center mb-16" data-cursorvariant="text">Our Process</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {designProcessSteps.map((step, index) => (
-                        <motion.div key={step.title} initial={{opacity: 0, y: 20}} whileInView={{opacity: 1, y: 0}} transition={{duration: 0.8, delay: index * 0.1, ease: 'easeOut'}} viewport={{once: true}} className="border-l-2 border-[#C51A24] pl-6">
-                            <h3 className="text-lg font-semibold mb-2" data-cursorvariant="text">{step.title}</h3>
-                            <p className={`text-sm ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} data-cursorvariant="text">{step.description}</p>
-                        </motion.div>
-                    ))}
-                </div>
-            </div>
-        </AnimatedSection>
-        <AnimatedSection className={`py-20 md:py-28 ${theme === 'dark' ? 'bg-[#1A1A1A]' : 'bg-[#EAEAEA]'}`}>
-            <div className="container mx-auto px-4">
-                <h2 className="text-3xl font-bold text-center mb-16" data-cursorvariant="text">What Our Clients Say</h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-                    {testimonials.map((t, i) => (
-                         <motion.div key={i} initial={{opacity: 0, y: 20}} whileInView={{opacity: 1, y: 0}} transition={{duration: 0.8, delay: i * 0.2, ease: 'easeOut'}} viewport={{once: true}} className={`p-8 rounded-lg relative overflow-hidden ${theme === 'dark' ? 'bg-[#111]' : 'bg-white shadow-md'}`}>
-                            <div className="relative">
-                                <p className={`italic mb-6 ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`} data-cursorvariant="text">"{t.quote}"</p>
-                                <p className="font-bold text-sm">{t.name}, <span className="text-[#C51A24]">{t.company}</span></p>
-                            </div>
-                        </motion.div>
-                    ))}
-                </div>
-            </div>
-        </AnimatedSection>
-        <AnimatedSection className={`py-20 md:py-28 ${theme === 'dark' ? 'bg-[#0D0D0D]' : 'bg-[#F5F5F5]'}`}>
-            <div className="container mx-auto px-4">
+        <section ref={containerRef} className="relative py-20 md:py-28">
+            <div className="container mx-auto px-4 max-w-3xl text-center mb-24">
                 <AnimatedText 
-                    text="Our Services"
+                    text="My Services"
                     el="h2"
-                    className="text-3xl font-bold text-center mb-16"
+                    className="text-3xl md:text-5xl font-bold"
                     data-cursorvariant="text"
                 />
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                    {servicesData.map((service, i) => (
-                        <motion.div key={i} initial={{opacity: 0, y: 20}} whileInView={{opacity: 1, y: 0}} transition={{duration: 0.8, delay: i * 0.1, ease: 'easeOut'}} viewport={{once: true}} className={`p-8 rounded-lg border transition-colors relative overflow-hidden ${theme === 'dark' ? 'bg-[#1A1A1A] border-transparent' : 'bg-white border-gray-200 shadow-sm'}`}>
-                            <div className="relative">
-                                <h3 className="text-xl font-bold mb-4 text-[#C51A24]" data-cursorvariant="text">{service.title}</h3>
-                                <p className={`text-sm ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`} data-cursorvariant="text">{service.description}</p>
+            </div>
+            {servicesData.map((service, i) => {
+                const targetRef = useRef(null);
+                const { scrollYProgress: cardScrollYProgress } = useScroll({
+                    target: targetRef,
+                    offset: ['start end', 'start start']
+                });
+
+                const scale = useTransform(cardScrollYProgress, [0, 1], [1 - (servicesData.length - i) * 0.05, 1]);
+                const opacity = useTransform(cardScrollYProgress, [0.5, 1], [0.5, 1]);
+                
+                return (
+                    <motion.div
+                        ref={targetRef}
+                        key={i}
+                        className="h-screen sticky top-0 flex items-center justify-center"
+                    >
+                        <motion.div 
+                            style={{ 
+                                scale, 
+                                opacity,
+                                top: `${i * 2}rem`
+                            }}
+                            className="relative w-full max-w-4xl h-3/4 p-8 rounded-2xl flex flex-col justify-center"
+                        >
+                            <div className="absolute inset-0 rounded-2xl" style={{backgroundColor: service.color}}></div>
+                            <div className="relative text-white">
+                                <h3 className="text-3xl md:text-5xl font-bold mb-4" data-cursorvariant="text">{service.title}</h3>
+                                <p className="text-lg md:text-xl" data-cursorvariant="text">{service.description}</p>
                             </div>
+                        </motion.div>
+                    </motion.div>
+                );
+            })}
+        </section>
+    );
+};
+
+const SkillsSection = ({ theme }) => {
+    const skills = [
+        { name: 'HTML', Icon: () => <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>HTML5</title><path d="M1.5 0h21l-1.91 21.563L11.977 24l-8.565-2.438L1.5 0zm7.031 9.75l-.232-2.718 10.059.003.23-2.622-13.23.002.69 7.843h11.42l-.327 3.426-2.91.804-2.956-.81-.188-2.11h-2.61l.29 3.855L12 19.25l5.873-1.57-.79-8.93z" fill="currentColor"/></svg> },
+        { name: 'CSS', Icon: () => <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>CSS3</title><path d="M1.5 0h21l-1.91 21.563L11.977 24l-8.565-2.438L1.5 0zm7.031 9.75l-.232-2.718 10.059.003.23-2.622-13.23.002.69 7.843h11.42l-.327 3.426-2.91.804-2.956-.81-.188-2.11h-2.61l.29 3.855L12 19.25l5.873-1.57-.79-8.93z" fill="currentColor"/></svg> },
+        { name: 'Sass', Icon: () => <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Sass</title><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm6.158 17.158c-.32.32-.737.526-1.18.526-.442 0-.858-.207-1.18-.526l-1.842-1.842c-.32-.32-.526-.737-.526-1.18 0-.442.207-.858.526-1.18.32-.32.737-.526 1.18-.526.442 0 .858.207 1.18.526l1.842 1.842c.32.32.526.737.526 1.18 0 .442-.207.858-.526 1.18zM12 14.474c-3.368 0-6.105-2.737-6.105-6.105S8.632 2.263 12 2.263s6.105 2.737 6.105 6.105-2.737 6.106-6.105 6.106z" fill="currentColor"/></svg> },
+        { name: 'JavaScript', Icon: () => <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>JavaScript</title><path d="M0 0h24v24H0V0zm22.034 18.262c.42.639.639 1.25.639 1.875 0 .654-.234 1.224-.702 1.711-.459.486-1.089.729-1.89.729-.72 0-1.323-.189-1.809-.567-.486-.378-.846-.891-1.079-1.539l1.449-.837c.144.45.387.792.729.999.342.207.72.306 1.134.306.414 0 .783-.099 1.107-.297a1.13 1.13 0 00.468-.828c0-.306-.081-.576-.243-.81-.162-.234-.423-.486-.783-.756l-1.026-.756c-1.116-.81-1.926-1.584-2.43-2.322-.495-.738-.747-1.539-.747-2.403 0-.81.252-1.53.756-2.16.504-.63 1.161-.945 1.971-.945.621 0 1.179.162 1.674.486.495.324.864.765 1.107 1.323l-1.422.864c-.18-.459-.423-.792-.729-.999-.306-.207-.666-.306-1.08-.306-.396 0-.726.09-.99.27-.264.18-.396.423-.396.729 0 .288.072.54.216.756.144.216.396.459.756.729l1.044.756c1.35.972 2.349 1.899 3.006 2.781.657.882.981 1.836.981 2.862zm-8.43-1.026h-3.996v3.996h-1.98v-3.996h-2.016v-1.89h2.016v-2.97h1.98v2.97h3.996v1.89z" fill="currentColor"/></svg> },
+        { name: 'React', Icon: () => <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>React</title><path d="M12 2C6.477 2 2 6.477 2 12s4.477 10 10 10 10-4.477 10-10S17.523 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8zm-1.88-9.54c-.45-.25-1.02-.25-1.47 0-.45.25-.73.76-.73 1.32 0 .56.28 1.07.73 1.32.45.25 1.02.25 1.47 0 .45-.25.73-.76.73-1.32 0-.56-.28-1.07-.73-1.32zM12 4.44c-2.44 0-4.63.92-6.26 2.45l1.41 1.41C8.4 7.08 10.12 6.44 12 6.44s3.6.64 4.85 1.86l1.41-1.41C16.63 5.36 14.44 4.44 12 4.44zm0 15.12c2.44 0 4.63-.92 6.26-2.45l-1.41-1.41C15.6 16.92 13.88 17.56 12 17.56s-3.6-.64-4.85-1.86l-1.41 1.41C7.37 18.64 9.56 19.56 12 19.56zm6.12-6.36c-.45-.25-1.02-.25-1.47 0-.45.25-.73.76-.73 1.32 0 .56.28 1.07.73 1.32.45.25 1.02.25 1.47 0 .45-.25.73-.76.73-1.32 0-.56-.28-1.07-.73-1.32z" fill="currentColor"/></svg> },
+        { name: 'Git', Icon: () => <svg role="img" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><title>Git</title><path d="M22.502 8.685l-8.685-8.685a2.502 2.502 0 00-3.538 0l-8.685 8.685a2.502 2.502 0 000 3.538l8.685 8.685a2.502 2.502 0 003.538 0l8.685-8.685a2.502 2.502 0 000-3.538zM12 18.11c-3.373 0-6.11-2.737-6.11-6.11s2.737-6.11 6.11-6.11 6.11 2.737 6.11 6.11-2.737 6.11-6.11 6.11zm-1.833-6.11a1.833 1.833 0 113.666 0 1.833 1.833 0 01-3.666 0z" fill="currentColor"/></svg> },
+    ];
+
+    return (
+        <AnimatedSection className={`py-20 md:py-28 ${theme === 'dark' ? 'bg-[#111]' : 'bg-gray-100'}`}>
+            <div className="container mx-auto px-4">
+                <AnimatedText 
+                    text="My Toolkit"
+                    el="h2"
+                    className="text-3xl md:text-5xl font-bold text-center mb-16"
+                    data-cursorvariant="text"
+                />
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-8 max-w-4xl mx-auto">
+                    {skills.map((skill, i) => (
+                        <motion.div 
+                            key={i} 
+                            whileHover={{ scale: 1.1, rotate: 5 }}
+                            transition={{ type: 'spring', stiffness: 300 }}
+                            className={`p-6 rounded-lg flex flex-col items-center justify-center gap-4 ${theme === 'dark' ? 'bg-[#1A1A1A]' : 'bg-white shadow-md'}`}
+                        >
+                            <div className={`w-16 h-16 ${theme === 'dark' ? 'text-white' : 'text-black'}`}>
+                                <skill.Icon />
+                            </div>
+                            <p className="font-semibold text-sm">{skill.name}</p>
                         </motion.div>
                     ))}
                 </div>
             </div>
         </AnimatedSection>
-    </motion.div>
-)};
+    );
+};
+
+const HomePage = ({ theme, navigateTo }) => {
+    const ThreeCanvas = ({ sceneInitializer }) => {
+        const canvasRef = useRef(null);
+        const mouseRef = useRef({ x: 0, y: 0 });
+
+        useEffect(() => {
+            const handleMouseMove = (e) => {
+                mouseRef.current.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouseRef.current.y = -(e.clientY / window.innerHeight) * 2 + 1;
+            };
+            window.addEventListener('mousemove', handleMouseMove);
+
+            const sceneInstance = sceneInitializer(canvasRef.current, mouseRef.current);
+            sceneInstance.start();
+            window.addEventListener('resize', sceneInstance.resize);
+
+            return () => {
+                sceneInstance.stop();
+                window.removeEventListener('resize', sceneInstance.resize);
+                window.removeEventListener('mousemove', handleMouseMove);
+            };
+        }, [sceneInitializer]);
+
+        return <canvas ref={canvasRef} className="absolute top-0 left-0 w-full h-full z-0" />;
+    };
+
+    const headline = "DESIGN & DEV";
+    const headlineVariants = {
+        hidden: { opacity: 0 },
+        visible: {
+            opacity: 1,
+            transition: {
+                staggerChildren: 0.08,
+            },
+        },
+    };
+    const letterVariants = {
+        hidden: { opacity: 0, y: 50 },
+        visible: {
+            opacity: 1,
+            y: 0,
+            transition: {
+                type: 'spring',
+                damping: 12,
+                stiffness: 200,
+            },
+        },
+    };
+
+    return (
+        <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit">
+            <div className={`relative min-h-screen flex flex-col items-center justify-center overflow-hidden px-4`}>
+                <ThreeCanvas sceneInitializer={sceneInitializers.initTorusKnotScene} />
+                <div className="relative z-10 text-center">
+                    <motion.h1
+                        variants={headlineVariants}
+                        initial="hidden"
+                        animate="visible"
+                        className="text-5xl md:text-8xl font-extrabold tracking-tighter"
+                        data-cursorvariant="text"
+                    >
+                        {headline.split("").map((char, index) => (
+                            <motion.span key={index} variants={letterVariants} className="inline-block">
+                                {char}
+                            </motion.span>
+                        ))}
+                    </motion.h1>
+                    <AnimatedText 
+                        text="A creative developer crafting digital experiences that inspire and engage."
+                        el="p"
+                        className={`max-w-xl mx-auto mt-6 mb-8 text-sm md:text-base ${theme === 'dark' ? 'text-gray-300' : 'text-gray-700'}`}
+                        data-cursorvariant="text"
+                    />
+                    <MagneticButton 
+                        onClick={() => navigateTo('gallery')}
+                        className={`group inline-flex items-center space-x-3 border rounded-full px-8 py-4 text-sm font-semibold transition-all duration-300 ${theme === 'dark' ? 'border-gray-600 hover:bg-white hover:text-black' : 'border-gray-400 hover:bg-black hover:text-white'}`}
+                    >
+                        <span>Explore My Work</span>
+                        <ArrowIcon className="transform transition-transform duration-500 ease-out group-hover:translate-x-1" />
+                    </MagneticButton>
+                </div>
+            </div>
+            <SkillsSection theme={theme} />
+            <ServicesSection theme={theme} />
+        </motion.div>
+    );
+};
 
 // --- 3D Scene Initializers ---
 const sceneInitializers = {
@@ -981,28 +1149,82 @@ const sceneInitializers = {
             renderer.setSize(window.innerWidth, window.innerHeight);
         };
         return { start: animate, stop: () => cancelAnimationFrame(frameId), resize: handleResize };
+    },
+    initSwirlScene: (canvas, mouse) => {
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 10;
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+
+        const particles = [];
+        const numParticles = 500;
+        const particleMaterial = new THREE.PointsMaterial({ color: 0x888888, size: 0.1, transparent: true, opacity: 0.6, blending: THREE.AdditiveBlending });
+        
+        for (let i = 0; i < numParticles; i++) {
+            const angle = (i / numParticles) * Math.PI * 6;
+            const radius = Math.random() * 5 + 2;
+            particles.push({
+                position: new THREE.Vector3(Math.cos(angle) * radius, (Math.random() - 0.5) * 10, Math.sin(angle) * radius),
+                initialAngle: angle,
+                radius: radius
+            });
+        }
+
+        const positionsArray = new Float32Array(numParticles * 3);
+        particles.forEach((p, i) => p.position.toArray(positionsArray, i * 3));
+        const geometry = new THREE.BufferGeometry();
+        geometry.setAttribute('position', new THREE.BufferAttribute(positionsArray, 3));
+        const pointsMesh = new THREE.Points(geometry, particleMaterial);
+        scene.add(pointsMesh);
+
+        let frameId;
+        const animate = () => {
+            frameId = requestAnimationFrame(animate);
+            const time = Date.now() * 0.0005;
+            const currentPositions = geometry.attributes.position.array;
+            for (let i = 0; i < numParticles; i++) {
+                const p = particles[i];
+                const angle = p.initialAngle + time;
+                currentPositions[i * 3] = Math.cos(angle) * p.radius;
+                currentPositions[i * 3 + 2] = Math.sin(angle) * p.radius;
+            }
+            geometry.attributes.position.needsUpdate = true;
+            
+            scene.rotation.y += 0.001;
+            camera.position.x += (mouse.x * 2 - camera.position.x) * 0.05;
+            camera.position.y += (-mouse.y * 2 - camera.position.y) * 0.05;
+            camera.lookAt(scene.position);
+            renderer.render(scene, camera);
+        };
+        const handleResize = () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        };
+        return { start: animate, stop: () => cancelAnimationFrame(frameId), resize: handleResize };
     }
 };
 
 // --- ALL PROJECT DATA ---
 const allProjects = [
     {
-        id: 1, title: "Project Alpha", category: "Branding", img: "https://placehold.co/600x400/C51A24/1A1A1A?text=Alpha",
+        id: 1, title: "Project Alpha", category: "Branding", img: "https://placehold.co/600x400/1a1a1a/f5f5f5?text=Alpha",
         subtitle: "Interactive Data Dashboard", description: "Designed and developed a cutting-edge interactive data dashboard for a B2B SaaS platform, focusing on real-time analytics and user-friendly visualization.",
         bgColor: "#ebdcf3", sceneInitializer: sceneInitializers.initParticleScene,
     },
     {
-        id: 2, title: "Project Beta", category: "Web Design", img: "https://placehold.co/600x400/333333/FFFFFF?text=Beta",
+        id: 2, title: "Project Beta", category: "Web Design", img: "https://placehold.co/600x400/c51a24/f5f5f5?text=Beta",
         subtitle: "E-commerce Platform Redesign", description: "Led the UI/UX redesign and front-end development for a fashion e-commerce site, improving conversion rates by 20% through optimized user flows and modern aesthetics.",
         bgColor: "#eed8d3", sceneInitializer: sceneInitializers.initCubeGridScene,
     },
     {
-        id: 3, title: "Project Gamma", category: "UI/UX", img: "https://placehold.co/600x400/555555/FFFFFF?text=Gamma",
+        id: 3, title: "Project Gamma", category: "UI/UX", img: "https://placehold.co/600x400/333333/f5f5f5?text=Gamma",
         subtitle: "Mobile App Concept & Prototype", description: "Developed an interactive prototype for a new wellness mobile application, focusing on intuitive navigation and a calming visual design.",
         bgColor: "#a3cca5", sceneInitializer: sceneInitializers.initLineMeshScene,
     },
     {
-        id: 4, title: "Island World", category: "3D Environment", img: "https://placehold.co/600x400/2c5282/FFFFFF?text=Island",
+        id: 4, title: "Island World", category: "3D Environment", img: "https://placehold.co/600x400/2c5282/f5f5f5?text=Island",
         subtitle: "Interactive 3D Island", description: "A proceduraly generated 3D island environment with dynamic water and sky, showcasing advanced Three.js skills.",
         bgColor: "#87CEEB", sceneInitializer: sceneInitializers.initIslandScene,
     },
@@ -1012,9 +1234,9 @@ const allProjects = [
         bgColor: "#bfbfab", sceneInitializer: sceneInitializers.initFallingParticlesScene,
     },
     {
-        id: 6, title: "Project Zeta", category: "UI/UX", img: "https://placehold.co/600x400/666666/FFFFFF?text=Zeta",
+        id: 6, title: "Project Zeta", category: "UI/UX", img: "https://placehold.co/600x400/666666/f5f5f5?text=Zeta",
         subtitle: "3D Product Configurator", description: "Built an interactive 3D product configurator for a furniture company, allowing users to customize materials and colors in real-time.",
-        bgColor: "#F3E5F5", sceneInitializer: sceneInitializers.initTorusKnotScene,
+        bgColor: "#F3E5F5", sceneInitializer: sceneInitializers.initSwirlScene,
     },
 ];
 
@@ -1123,7 +1345,7 @@ const ProjectsPage = ({ theme, initialIndex = 0 }) => {
             <div className="absolute top-0 left-0 w-full h-full flex items-center justify-center p-8 md:p-16 text-black" style={{ backgroundColor: project.bgColor }}>
                 {isActive && <ThreeCanvas sceneInitializer={project.sceneInitializer} />}
                 <div className="relative z-10 w-full h-full flex flex-col justify-between items-start text-left pt-24 md:pt-16">
-                    <h2 className="font-['Neue_Machina',_sans-serif] font-bold uppercase text-[clamp(2.8rem,9vw,7rem)] leading-none opacity-80" data-cursorvariant="text">
+                    <h2 className="font-['Neue_Machina',_sans_serif] font-bold uppercase text-[clamp(2.8rem,9vw,7rem)] leading-none opacity-80" data-cursorvariant="text">
                         {project.title}
                     </h2>
                     <div className="max-w-md self-end text-right mb-10">
