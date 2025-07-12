@@ -433,7 +433,7 @@ const Header = ({ currentPage, navigateTo, onMenuClick, theme, toggleTheme, isTo
                         <path d="M20,80 L50,20 L80,80 Z" fill="none" stroke="#C51A24" strokeWidth="8"/>
                         <path d="M25,70 L75,70" fill="none" stroke="#C51A24" strokeWidth="8"/>
                     </svg>
-                    <span className="text-xl font-bold tracking-wider">STUDIO</span>
+                    <span className="text-xl font-bold tracking-wider">CHARLZ</span>
                 </button>
                 <nav className="hidden md:flex items-center space-x-2 backdrop-blur-sm bg-white/10 rounded-full">
                     {navItems.map(item => {
@@ -555,7 +555,7 @@ const Footer = ({ theme }) => {
         },
         { 
             name: 'Email', 
-            href: 'mailto:info@studio.example', 
+            href: 'mailto:charlesobuzor@outlook.com', 
             Icon: ({className}) => <svg className={className} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path><polyline points="22,6 12,13 2,6"></polyline></svg>
         },
     ];
@@ -584,7 +584,6 @@ const Footer = ({ theme }) => {
                         </motion.a>
                     ))}
                 </div>
-                <p className="text-xs tracking-wider">&copy; 2025 Studio. All Rights Reserved.</p>
             </div>
         </footer>
     );
@@ -702,7 +701,7 @@ const ServicesSection = ({ theme }) => {
         <section className={`py-20 md:py-28 ${theme === 'dark' ? 'bg-[#0D0D0D]' : 'bg-[#F5F5F5]'}`}>
              <div className="container mx-auto px-4 max-w-3xl text-center mb-24">
                 <AnimatedText
-                    text="Our Expertise"
+                    text="My Expertise"
                     el="h2"
                     className="text-3xl md:text-5xl font-bold"
                     data-cursorvariant="text"
@@ -1182,32 +1181,32 @@ const allProjects = [
     {
         id: 1, title: "Project Alpha", category: "Branding", img: "https://placehold.co/600x400/1a1a1a/f5f5f5?text=Alpha",
         subtitle: "Interactive Data Dashboard", description: "Designed and developed a cutting-edge interactive data dashboard for a B2B SaaS platform, focusing on real-time analytics and user-friendly visualization.",
-        bgColor: "#ebdcf3", sceneInitializer: sceneInitializers.initParticleScene,
+        bgColor: "#ebdcf3", preview: "", sceneInitializer: sceneInitializers.initParticleScene,
     },
     {
         id: 2, title: "Project Beta", category: "Web Design", img: "https://placehold.co/600x400/c51a24/f5f5f5?text=Beta",
         subtitle: "E-commerce Platform Redesign", description: "Led the UI/UX redesign and front-end development for a fashion e-commerce site, improving conversion rates by 20% through optimized user flows and modern aesthetics.",
-        bgColor: "#eed8d3", sceneInitializer: sceneInitializers.initCubeGridScene,
+        bgColor: "#eed8d3", preview: "", sceneInitializer: sceneInitializers.initCubeGridScene,
     },
     {
         id: 3, title: "Project Gamma", category: "UI/UX", img: "https://placehold.co/600x400/333333/f5f5f5?text=Gamma",
         subtitle: "Mobile App Concept & Prototype", description: "Developed an interactive prototype for a new wellness mobile application, focusing on intuitive navigation and a calming visual design.",
-        bgColor: "#a3cca5", sceneInitializer: sceneInitializers.initLineMeshScene,
+        bgColor: "#a3cca5", preview: "", sceneInitializer: sceneInitializers.initLineMeshScene,
     },
     {
         id: 4, title: "Island World", category: "3D Environment", img: "https://placehold.co/600x400/2c5282/f5f5f5?text=Island",
         subtitle: "Interactive 3D Island", description: "A proceduraly generated 3D island environment with dynamic water and sky, showcasing advanced Three.js skills.",
-        bgColor: "#87CEEB", sceneInitializer: sceneInitializers.initIslandScene,
+        bgColor: "#87CEEB", preview: "", sceneInitializer: sceneInitializers.initIslandScene,
     },
     {
         id: 5, title: "Project Epsilon", category: "Branding", img: "https://placehold.co/600x400/C51A24/2c2c2c?text=Epsilon",
         subtitle: "AI-Powered Content Summarizer", description: "Developed a web tool that uses AI to summarize long articles or documents, providing concise key points for quick understanding.",
-        bgColor: "#bfbfab", sceneInitializer: sceneInitializers.initFallingParticlesScene,
+        bgColor: "#bfbfab", preview: "3dydx.vercel.app", sceneInitializer: sceneInitializers.initFallingParticlesScene,
     },
     {
         id: 6, title: "Project Zeta", category: "UI/UX", img: "https://placehold.co/600x400/666666/f5f5f5?text=Zeta",
         subtitle: "3D Product Configurator", description: "Built an interactive 3D product configurator for a furniture company, allowing users to customize materials and colors in real-time.",
-        bgColor: "#F3E5F5", sceneInitializer: sceneInitializers.initSwirlScene,
+        bgColor: "#F3E5F5", preview: "", sceneInitializer: sceneInitializers.initSwirlScene,
     },
 ];
 
@@ -1224,7 +1223,7 @@ const GalleryPage = ({ theme, navigateToProject }) => {
 
     return (
         <motion.div variants={pageVariants} initial="initial" animate="animate" exit="exit" className="pt-32 pb-20 container mx-auto px-4">
-             <h1 className="text-5xl font-bold text-center mb-4" data-cursorvariant="text">Our Work</h1>
+             <h1 className="text-5xl font-bold text-center mb-4" data-cursorvariant="text">My Work</h1>
              <p className={`text-base text-center mb-12 ${theme === 'dark' ? 'text-gray-400' : 'text-gray-600'}`} data-cursorvariant="text">A collection of projects we are proud of.</p>
              <div className="flex justify-center flex-wrap gap-4 mb-12">
                  {filters.map(filter => (
@@ -1322,7 +1321,7 @@ const ProjectsPage = ({ theme, initialIndex = 0 }) => {
                     <div className="max-w-md self-end text-right mb-10">
                         <h3 className="font-bold text-xl mb-2">{project.subtitle}</h3>
                         <p className="opacity-70 text-sm">{project.description}</p>
-                        <MagneticButton as="a" href="#" className="inline-flex self-end text-blue-600 hover:text-blue-800 font-semibold items-center mt-4 text-sm">
+                        <MagneticButton as="a" href={project.preview} className="inline-flex self-end text-blue-600 hover:text-blue-800 font-semibold items-center mt-4 text-sm">
                             View Case Study
                             <ArrowIcon className="ml-2 w-5 h-5" />
                         </MagneticButton>
