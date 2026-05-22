@@ -13,6 +13,8 @@
 
 <br />
 
+---
+
 <!-- ═══════════════════════════════════════════════════════════════
      STREAK
      ═══════════════════════════════════════════════════════════════ -->
@@ -23,6 +25,61 @@
 </div>
 
 <br />
+
+---
+
+### the tools · the craft
+
+#### frontend
+<p align="left">
+  <img src="https://img.shields.io/badge/-React-EEEAE3?style=flat&logo=react&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="React" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-React_Native-EEEAE3?style=flat&logo=react&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="React Native" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-Next.js-EEEAE3?style=flat&logo=nextdotjs&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="Next.js" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-TypeScript-EEEAE3?style=flat&logo=typescript&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="TypeScript" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-JavaScript-EEEAE3?style=flat&logo=javascript&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="JavaScript" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-Expo-EEEAE3?style=flat&logo=expo&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="Expo" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-Tailwind_CSS-EEEAE3?style=flat&logo=tailwindcss&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="Tailwind CSS" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-Framer_Motion-EEEAE3?style=flat&logo=framer&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="Framer Motion" />
+</p>
+
+#### backend
+<p align="left">
+  <img src="https://img.shields.io/badge/-Node.js-EEEAE3?style=flat&logo=nodedotjs&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="Node.js" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-Prisma-EEEAE3?style=flat&logo=prisma&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="Prisma" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-Convex-EEEAE3?style=flat&logo=convex&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="Convex" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-Supabase-EEEAE3?style=flat&logo=supabase&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="Supabase" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-Neon-EEEAE3?style=flat&logo=neon&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="Neon" />
+</p>
+
+#### tooling & design
+<p align="left">
+  <img src="https://img.shields.io/badge/-Git-EEEAE3?style=flat&logo=git&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="Git" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-GitHub-EEEAE3?style=flat&logo=github&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="GitHub" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-Vite-EEEAE3?style=flat&logo=vite&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="Vite" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-Vercel-EEEAE3?style=flat&logo=vercel&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="Vercel" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-Figma-EEEAE3?style=flat&logo=figma&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="Figma" />
+  &nbsp;
+  <img src="https://img.shields.io/badge/-Canva-EEEAE3?style=flat&logo=canva&logoColor=166534&labelColor=EEEAE3&color=EEEAE3" alt="Canva" />
+</p>
+
+<br />
+
+---
 
 <!-- ═══════════════════════════════════════════════════════════════
      ISOMETRIC CALENDAR (weekly, half‑year)
@@ -35,6 +92,8 @@
 </div>
 
 <br />
+
+---
 
 <!-- ═══════════════════════════════════════════════════════════════
      TROPHIES
